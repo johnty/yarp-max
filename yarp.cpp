@@ -1,18 +1,10 @@
 /**
 	@file
-	yarp - yarp
-			- based on collect example: collectsnumbers and operate on them.
-			- demonstrates use of C++ and the STL in a Max external
-			- also demonstrates use of a mutex for thread safety
-			- demonstrate project setup for static linking to the Microsoft Runtime
-
-	@ingroup	examples
-
-	Copyright 2009 - Cycling '74
-	Timothy Place, tim@cycling74.com
-
-	2014 - Hplus
+	yarp		- yarp
+				- MaxMSP external with interfaces to yarp.
+				- requires libACE.dylib (OSX) or ACE(d).dll (Windows)
 	Johnty Wang -  johntywang@gmail.com
+	2014 - Hplus Canraie M+M project
 */
 
 #undef check //for OSX
@@ -77,9 +69,11 @@ typedef struct _yarp {
 	int					x_polltime_ms;
 	bool				x_stop_thread;
 	void				*c_outlet;
+	void				*c_inlet;
 
 	yarp::os::Network *yarp;
 	yarp::os::BufferedPort<yarp::os::Bottle> *port;
+	yarp::os::Bottle *out;
 } t_yarp;
 
 
@@ -95,7 +89,7 @@ void	yarp_float(t_yarp *x, double value);
 void	yarp_list(t_yarp *x, t_symbol *msg, long argc, t_atom *argv);
 void	yarp_clear(t_yarp *x);
 //setup as yarp reader
-void	yarp_read(t_yarp *x, symbol *s);
+void	yarp_read_setup(t_yarp *x, symbol *s);
 
 void	yarp_readbang(t_yarp *x);
 void	yarp_poll(t_yarp *x, long value);
@@ -104,6 +98,7 @@ void	*yarp_readthread(t_yarp *x);
 void	yarp_readthread_stop(t_yarp *x);
 
 //setup as yarp writer
+void	yarp_write_setup(t_yarp *x, symbol *s);
 void	yarp_write(t_yarp *x, symbol *s);
 // yarp init
 
@@ -136,7 +131,8 @@ int T_EXPORT main(void)
 	class_addmethod(c, (method)yarp_clear,	"clear",		0);
 	class_addmethod(c, (method)yarp_count,	"count",		0);
 	class_addmethod(c, (method)yarp_assist, "assist",		A_CANT, 0);
-	class_addmethod(c, (method)yarp_read,   "read",			A_SYM, 0);
+	class_addmethod(c, (method)yarp_read_setup,   "read",			A_SYM, 0);
+	class_addmethod(c, (method)yarp_write_setup,   "write",			A_SYM, 0);	
 	class_addmethod(c, (method)yarp_poll,	"poll",			A_LONG,	0);
 
 	class_addmethod(c, (method)stdinletinfo,	"inletinfo",	A_CANT, 0);
@@ -166,6 +162,7 @@ void *yarp_new(t_symbol *s, long argc, t_atom *argv)
 		systhread_mutex_new(&x->x_mutex, 0);
 		x->x_polltime_ms = 500; //poll every ms by default
 		x->c_outlet = outlet_new(x, NULL);
+		x->c_inlet = inlet_new(x, NULL);
 		x->x_stop_thread = true; //default: no thread running
 		
 	}
@@ -176,12 +173,18 @@ void *yarp_new(t_symbol *s, long argc, t_atom *argv)
 		if (strcmp("read", atom_getsym(argv)->s_name) == 0) {
 			char str[32];
 			sprintf(str, "%s", atom_getsym(argv+1)->s_name);
-			post("init reader address = %s",str);
-			yarp_read(x, atom_getsym(argv+1));
+			post("init yarp reader address = %s",str);
+			yarp_read_setup(x, atom_getsym(argv+1));
+		}
+		else if (strcmp("write", atom_getsym(argv)->s_name) == 0) {
+			char str[32];
+			sprintf(str, "%s", atom_getsym(argv+1)->s_name);
+			post("init yarp writer address = %s",str);
+			yarp_write_setup(x, atom_getsym(argv+1));
 		}
 	}
-	else {
-		yarp_read(x, gensym("/readMax"));
+	else { //default, make a yarp reader
+		yarp_read_setup(x, gensym("/readMax"));
 	}
 	return(x);
 }
@@ -189,16 +192,18 @@ void *yarp_new(t_symbol *s, long argc, t_atom *argv)
 void init_yarp(t_yarp	*x) {
 	x->yarp = new yarp::os::Network();
 	x->port = new yarp::os::BufferedPort<yarp::os::Bottle>();
+	x->out = new yarp::os::Bottle;
 }
 
 
 void yarp_free(t_yarp *x)
 {
 	x->port->close();
-
+	
 	yarp_readthread_stop(x);
 
 	delete x->port;
+	delete x->out;
 	delete x->yarp;
 	
 	systhread_mutex_free(x->x_mutex);
@@ -210,10 +215,14 @@ void yarp_free(t_yarp *x)
 
 void yarp_assist(t_yarp *x, void *b, long msg, long arg, char *dst)
 {
-	if (msg==1)
-		strcpy(dst, "input");
+	if (msg==1) {
+		strcpy(dst, "set up yarp (read /XX or write /XX)");
+		if (arg == 1)
+			strcpy(dst, "write input");
+	}
 	else if (msg==2)
 		strcpy(dst, "output");
+	
 }
 
 
@@ -228,7 +237,7 @@ void yarp_count(t_yarp *x)
 }
 
 //sets read message from patch: (re)set up read port, and initiate read thread
-void yarp_read(t_yarp *x, symbol *s)
+void yarp_read_setup(t_yarp *x, symbol *s)
 {
 	poststring("yarp read init. port name is:");
 	post(s->s_name);
@@ -240,15 +249,13 @@ void yarp_read(t_yarp *x, symbol *s)
 	}
 
 	bool port_success = false;
-	if (checkAddr(s->s_name)) {
-		port_success = x->port->open(s->s_name);
-	}
 	//first close port if currently open.
 	if (!x->port->isClosed())
 		x->port->close();	
-	if (checkAddr(s->s_name))
-		x->port->open(s->s_name);
-
+	if (checkAddr(s->s_name)) {
+		port_success = x->port->open(s->s_name);
+	}
+	
 	if (port_success) {
 		post("successfully opened port! starting read thread...");
 		x->x_stop_thread = false; //set flag to get thread going
@@ -360,5 +367,19 @@ bool checkAddr(char* addr) {
 	}
 	else {
 		return true;
+	}
+}
+
+void yarp_write_setup(t_yarp *x, symbol *s)
+{
+	//if (read)thread currently running, stop it
+	if (x->x_stop_thread == false) {
+		yarp_readthread_stop(x);
+	}
+	bool port_success = false;
+	if (!x->port->isClosed())
+		x->port->close();	
+	if (checkAddr(s->s_name)) {
+		port_success = x->port->open(s->s_name);
 	}
 }
