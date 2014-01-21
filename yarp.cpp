@@ -170,7 +170,7 @@ void *yarp_new(t_symbol *s, long argc, t_atom *argv)
 	if (x) {
 		
 		systhread_mutex_new(&x->x_mutex, 0);
-		x->x_polltime_ms = 500; //poll every ms by default
+		x->x_polltime_ms = 50; //poll every ms by default
 		x->c_outlet = outlet_new(x, NULL);
 		x->c_inlet = inlet_new(x, NULL);
 		x->x_stop_thread = true; //default: no thread running
