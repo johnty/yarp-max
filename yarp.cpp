@@ -99,9 +99,16 @@ void	yarp_readthread_stop(t_yarp *x);
 
 //setup as yarp writer
 void	yarp_write_setup(t_yarp *x, symbol *s);
-void	yarp_write(t_yarp *x, symbol *s);
-// yarp init
 
+void	yarp_send(t_yarp *x, t_symbol *msg, long argc, t_atom *argv);
+
+//setup yarp miniserver address
+bool	yarp_addr_setup(t_yarp *x, symbol *s);
+
+//yarp connect
+void	yarp_connect(t_yarp *x, symbol *s);
+
+// yarp init
 void	init_yarp(t_yarp	*x);
 
 bool	checkAddr(char* addr);
@@ -131,10 +138,13 @@ int T_EXPORT main(void)
 	class_addmethod(c, (method)yarp_clear,	"clear",		0);
 	class_addmethod(c, (method)yarp_count,	"count",		0);
 	class_addmethod(c, (method)yarp_assist, "assist",		A_CANT, 0);
+	class_addmethod(c, (method)yarp_addr_setup, "addr",		A_SYM, 0);
 	class_addmethod(c, (method)yarp_read_setup,   "read",			A_SYM, 0);
-	class_addmethod(c, (method)yarp_write_setup,   "write",			A_SYM, 0);	
+	class_addmethod(c, (method)yarp_write_setup,   "write",			A_SYM, 0);
+	class_addmethod(c, (method)yarp_send,   "send",			A_GIMME, 0);
 	class_addmethod(c, (method)yarp_poll,	"poll",			A_LONG,	0);
 
+	class_addmethod(c, (method)yarp_connect, "connect",		A_SYM, 0);
 	class_addmethod(c, (method)stdinletinfo,	"inletinfo",	A_CANT, 0);
 	
 	class_register(_sym_box, c);
@@ -169,22 +179,18 @@ void *yarp_new(t_symbol *s, long argc, t_atom *argv)
 
 	init_yarp(x);
 	bool port_success = false;
-	if (argc==2) {
-		if (strcmp("read", atom_getsym(argv)->s_name) == 0) {
-			char str[32];
-			sprintf(str, "%s", atom_getsym(argv+1)->s_name);
-			post("init yarp reader address = %s",str);
-			yarp_read_setup(x, atom_getsym(argv+1));
-		}
-		else if (strcmp("write", atom_getsym(argv)->s_name) == 0) {
-			char str[32];
-			sprintf(str, "%s", atom_getsym(argv+1)->s_name);
-			post("init yarp writer address = %s",str);
-			yarp_write_setup(x, atom_getsym(argv+1));
+	if (argc==1) {
+		char str[32];
+		sprintf(str, "%s", atom_getsym(argv)->s_name);
+		post("init yarp address = %s",str);
+		if (checkAddr(str))
+			yarp_addr_setup(x, atom_getsym(argv));
+		else {
+			yarp_addr_setup(x, gensym("/yarpMax"));
 		}
 	}
-	else { //default, make a yarp reader
-		yarp_read_setup(x, gensym("/readMax"));
+	else { //default name of address
+		yarp_addr_setup(x, gensym("/yarpMax"));
 	}
 	return(x);
 }
@@ -192,7 +198,7 @@ void *yarp_new(t_symbol *s, long argc, t_atom *argv)
 void init_yarp(t_yarp	*x) {
 	x->yarp = new yarp::os::Network();
 	x->port = new yarp::os::BufferedPort<yarp::os::Bottle>();
-	x->out = new yarp::os::Bottle;
+	//x->out = new yarp::os::Bottle;
 }
 
 
@@ -202,8 +208,11 @@ void yarp_free(t_yarp *x)
 	
 	yarp_readthread_stop(x);
 
+	x->port->unprepare();
 	delete x->port;
-	delete x->out;
+	//delete x->out;
+	
+	
 	delete x->yarp;
 	
 	systhread_mutex_free(x->x_mutex);
@@ -236,38 +245,42 @@ void yarp_count(t_yarp *x)
 	
 }
 
+//sets up object for write mode. (no readthread)
+void yarp_write_setup(t_yarp *x, symbol *s)
+{
+	post("setting up as writer");
+	if (yarp_addr_setup(x, s)) {
+		//if (read)thread currently running, stop it
+		if (x->x_stop_thread == false) {
+			yarp_readthread_stop(x);
+		}
+	}
+
+}
+
+
 //sets read message from patch: (re)set up read port, and initiate read thread
 void yarp_read_setup(t_yarp *x, symbol *s)
 {
-	poststring("yarp read init. port name is:");
-	post(s->s_name);
+	post("setting up as reader");
+	if (yarp_addr_setup(x, s)) {
+		//if thread currently running, stop it
+		if (x->x_stop_thread == false) {
+			yarp_readthread_stop(x);
+		}
 
+		yarp_addr_setup(x, s);
 
-	//if thread currently running, stop it
-	if (x->x_stop_thread == false) {
-		yarp_readthread_stop(x);
-	}
-
-	bool port_success = false;
-	//first close port if currently open.
-	if (!x->port->isClosed())
-		x->port->close();	
-	if (checkAddr(s->s_name)) {
-		port_success = x->port->open(s->s_name);
-	}
-	
-	if (port_success) {
-		post("successfully opened port! starting read thread...");
 		x->x_stop_thread = false; //set flag to get thread going
 		systhread_create((method) yarp_readthread, x, 0, 0, 0, &x->x_systhread);
+		
+		//testing: just pass the input directly out
+		t_atom* argv = NULL;
+		argv = new t_atom();
+		atom_setsym(argv, s);
+		outlet_anything(x->c_outlet, gensym("output"), 1, argv);
+		delete argv;
 	}
-
-	//testing: just pass the input directly out
-	t_atom* argv = NULL;
-	argv = new t_atom();
-	atom_setsym(argv, s);
-	outlet_anything(x->c_outlet, gensym("output"), 1, argv);
-	delete argv;
 }
 
 void yarp_start_readthread(t_yarp *x, symbol *s) {
@@ -288,7 +301,7 @@ void *yarp_readthread(t_yarp *x)
 		//todo: add read processing here
 
 		if (x->port->getPendingReads()) {
-            post("   read:");
+            post(">>>read:");
             yarp::os::Bottle *input = x->port->read();
             if (input != NULL) {
                 t_atom* argv = new t_atom();
@@ -345,13 +358,6 @@ void yarp_list(t_yarp *x, t_symbol *msg, long argc, t_atom *argv)
 	char str[32];
 	sprintf(str, "num= %ld",argc);
 	poststring(str);
-
-	/*systhread_mutex_lock(x->c_mutex);
-	for (int i=0; i<argc; i++) {
-		double value = atom_getfloat(argv+i);
-		x->c_vector->push_back(value);
-	}
-	systhread_mutex_unlock(x->c_mutex);*/
 }
 
 
@@ -370,16 +376,27 @@ bool checkAddr(char* addr) {
 	}
 }
 
-void yarp_write_setup(t_yarp *x, symbol *s)
-{
-	//if (read)thread currently running, stop it
-	if (x->x_stop_thread == false) {
-		yarp_readthread_stop(x);
-	}
+bool yarp_addr_setup(t_yarp *x, symbol *s) {
 	bool port_success = false;
 	if (!x->port->isClosed())
 		x->port->close();	
 	if (checkAddr(s->s_name)) {
 		port_success = x->port->open(s->s_name);
 	}
+	return port_success;
+}
+
+
+void yarp_send(t_yarp *x, t_symbol *msg, long argc, t_atom *argv) {
+	x->out = &(x->port->prepare());
+	x->out->clear();
+	for (int i=0; i<argc; i++) {
+		x->out->addString( atom_getsym(argv+i)->s_name );
+		post(atom_getsym(argv+i)->s_name);
+	}
+	x->port->write();
+}
+
+void yarp_connect(t_yarp *x, symbol *s)
+{
 }
