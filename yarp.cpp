@@ -7,13 +7,16 @@
 	2014 - Hplus Canraie M+M project
 */
 
+
 #undef check //for OSX
+
 
 #include "ext.h"
 #include "ext_obex.h"
 #include "ext_strings.h"
 #include "ext_common.h"
 #include "ext_systhread.h"
+#undef post
 #include "yarp/os/all.h"
 
 #include <vector>
@@ -354,10 +357,36 @@ void yarp_float(t_yarp *x, double value)
 
 void yarp_list(t_yarp *x, t_symbol *msg, long argc, t_atom *argv)
 {
+	x->out = &(x->port->prepare());
+	x->out->clear();
 
-	char str[32];
-	sprintf(str, "num= %ld",argc);
-	poststring(str);
+	post("num= %ld",argc);
+	int i;
+	t_atom* ap;
+	for (i = 0, ap = argv; i < argc; i++, ap++) {
+		switch (atom_gettype(ap)) {
+                case A_LONG:
+                    //post("%ld: %ld",i+1,atom_getlong(ap));
+					x->out->addInt(atom_getlong(ap));
+                    break;
+                case A_FLOAT:
+                    //post("%ld: %.2f",i+1,atom_getfloat(ap));
+					x->out->addDouble(atom_getfloat(ap));
+                    break;
+                case A_SYM:
+					//!!!note: strings (not symbols) get parsed here, but will crash yarp receiver
+					// for some reason
+                    //post("%ld: %s",i+1, atom_getsym(ap)->s_name);
+					//x->out->addString( atom_getsym(ap)->s_name );
+					//x->out->addString("a string");
+                    break;
+                default:
+                    post("%ld: unknown atom type (%ld)", i+1, atom_gettype(ap));
+                    break;
+		}
+		
+	}
+	x->port->write();
 }
 
 
@@ -391,6 +420,7 @@ void yarp_send(t_yarp *x, t_symbol *msg, long argc, t_atom *argv) {
 	x->out = &(x->port->prepare());
 	x->out->clear();
 	for (int i=0; i<argc; i++) {
+		post("arg %i = %s",i+1, atom_getsym(argv+i)->s_name);
 		x->out->addString( atom_getsym(argv+i)->s_name );
 		post(atom_getsym(argv+i)->s_name);
 	}
