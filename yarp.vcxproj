@@ -69,7 +69,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ACE_ROOT);$(YARP_DIR)/generated_include;$(YARP_DIR)/src/libYARP_OS/include;$(YARP_DIR)/src/libYARP_sig/include;$(YARP_DIR)/src/libYARP_dev/include;$(YARP_DIR)/src/libYARP_name/include;$(YARP_DIR)/src/yarpmanager/libymanager/include;$(YARP_DIR)/src/yarpserver/include;..\..\c74support\max-includes;..\..\c74support\msp-includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ACE_ROOT);$(YARP_DIR)/generated_include;$(YARP_DIR)/src/libYARP_OS/include;$(YARP_DIR)/src/libYARP_sig/include;$(YARP_DIR)/src/libYARP_dev/include;$(YARP_DIR)/src/libYARP_name/include;$(YARP_DIR)/src/yarpmanager/libymanager/include;$(YARP_DIR)/src/yarpserver/include;..\..\..\c74support\max-includes;..\..\..\c74support\msp-includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN_VERSION;WIN32;_DEBUG;_WINDOWS;_USRDLL;WIN_EXT_VERSION;_CRT_NOFORCE_MANIFEST;_STL_NOFORCE_MANIFEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -96,7 +96,7 @@
       <AdditionalDependencies>$(ACE_ROOT)\lib\ACEd.lib;$(YARP_DIR)\lib\Debug\YARP_initd.lib;$(YARP_DIR)\lib\Debug\YARP_serversqld.lib;$(YARP_DIR)\lib\Debug\YARP_devd.lib;$(YARP_DIR)\lib\Debug\YARP_sigd.lib;$(YARP_DIR)\lib\Debug\YARP_named.lib;$(YARP_DIR)\lib\Debug\YARP_OSd.lib;$(YARP_DIR)\lib\Debug\YARP_sqlited.lib;MaxAPI.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mxe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>.\..\..\c74support\max-includes;.\..\..\c74support\msp-includes;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\..\..\..\c74support\max-includes;.\..\..\..\c74support\msp-includes;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -123,7 +123,7 @@
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(ACE_ROOT);$(YARP_DIR)/generated_include;$(YARP_DIR)/src/libYARP_OS/include;$(YARP_DIR)/src/libYARP_sig/include;$(YARP_DIR)/src/libYARP_dev/include;$(YARP_DIR)/src/libYARP_name/include;$(YARP_DIR)/src/yarpmanager/libymanager/include;$(YARP_DIR)/src/yarpserver/include;..\..\c74support\max-includes;..\..\c74support\msp-includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ACE_ROOT);$(YARP_DIR)/generated_include;$(YARP_DIR)/src/libYARP_OS/include;$(YARP_DIR)/src/libYARP_sig/include;$(YARP_DIR)/src/libYARP_dev/include;$(YARP_DIR)/src/libYARP_name/include;$(YARP_DIR)/src/yarpmanager/libymanager/include;$(YARP_DIR)/src/yarpserver/include;..\..\..\c74support\max-includes;..\..\..\c74support\msp-includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN_VERSION;WIN32;NDEBUG;_WINDOWS;_USRDLL;WIN_EXT_VERSION;_CRT_NOFORCE_MANIFEST;_STL_NOFORCE_MANIFEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <StructMemberAlignment>2Bytes</StructMemberAlignment>
@@ -149,7 +149,7 @@
       <AdditionalDependencies>$(YARP_DIR)\lib\Release\YARP_initd.lib;$(YARP_DIR)\lib\Release\YARP_serversqld.lib;$(YARP_DIR)\lib\Release\YARP_dev.lib;$(YARP_DIR)\lib\Release\YARP_sig.lib;$(YARP_DIR)\lib\Release\YARP_name.lib;$(YARP_DIR)\lib\Release\YARP_OS.lib;$(YARP_DIR)\lib\Release\YARP_sqlite.lib;$(ACE_ROOT)\lib\ACE.lib;MaxAPI.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mxe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <AdditionalLibraryDirectories>.\..\..\c74support\max-includes;.\..\..\c74support\msp-includes;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\..\..\..\c74support\max-includes;.\..\..\..\c74support\msp-includes;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
       <ProgramDatabaseFile>$(IntDir)$(ProjectName).pdb</ProgramDatabaseFile>
@@ -162,8 +162,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\..\c74support\max-includes\common\commonsyms.c" />
     <ClCompile Include="yarp.cpp" />
-    <ClCompile Include="..\..\c74support\max-includes\common\commonsyms.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="yarp.def" />

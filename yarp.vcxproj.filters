@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\c74support\max-includes\common\commonsyms.c">
+    <ClCompile Include="yarp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="yarp.cpp">
+    <ClCompile Include="..\..\..\c74support\max-includes\common\commonsyms.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
