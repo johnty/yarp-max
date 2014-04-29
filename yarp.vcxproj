@@ -125,7 +125,7 @@
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>$(ACE_ROOT);$(YARP_DIR)/generated_include;$(YARP_DIR)/src/libYARP_OS/include;$(YARP_DIR)/src/libYARP_sig/include;$(YARP_DIR)/src/libYARP_dev/include;$(YARP_DIR)/src/libYARP_name/include;$(YARP_DIR)/src/yarpmanager/libymanager/include;$(YARP_DIR)/src/yarpserver/include;..\..\..\c74support\max-includes;..\..\..\c74support\msp-includes;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN_VERSION;WIN32;NDEBUG;_WINDOWS;_USRDLL;WIN_EXT_VERSION;_CRT_NOFORCE_MANIFEST;_STL_NOFORCE_MANIFEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <StructMemberAlignment>2Bytes</StructMemberAlignment>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>false</FunctionLevelLinking>
@@ -146,11 +146,12 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(YARP_DIR)\lib\Release\YARP_initd.lib;$(YARP_DIR)\lib\Release\YARP_serversqld.lib;$(YARP_DIR)\lib\Release\YARP_dev.lib;$(YARP_DIR)\lib\Release\YARP_sig.lib;$(YARP_DIR)\lib\Release\YARP_name.lib;$(YARP_DIR)\lib\Release\YARP_OS.lib;$(YARP_DIR)\lib\Release\YARP_sqlite.lib;$(ACE_ROOT)\lib\ACE.lib;MaxAPI.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ACE_ROOT)\lib\ACE.lib;$(YARP_DIR)\lib\Release\YARP_init.lib;$(YARP_DIR)\lib\Release\YARP_serversql.lib;$(YARP_DIR)\lib\Release\YARP_dev.lib;$(YARP_DIR)\lib\Release\YARP_sig.lib;$(YARP_DIR)\lib\Release\YARP_name.lib;$(YARP_DIR)\lib\Release\YARP_OS.lib;$(YARP_DIR)\lib\Release\YARP_sqlite.lib;MaxAPI.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mxe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>.\..\..\..\c74support\max-includes;.\..\..\..\c74support\msp-includes;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <IgnoreSpecificDefaultLibraries>LIBCMT;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>
+      </IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>.\$(ProjectName).def</ModuleDefinitionFile>
       <ProgramDatabaseFile>$(IntDir)$(ProjectName).pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -159,6 +160,7 @@
       <DataExecutionPrevention />
       <ImportLibrary>$(IntDir)$(ProjectName).lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
