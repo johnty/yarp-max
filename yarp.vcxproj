@@ -45,7 +45,7 @@
     <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>../../sdk-build\</OutDir>
+    <OutDir>../../../sdk-build\</OutDir>
     <IntDir>..\ext_win_debug\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
@@ -93,7 +93,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(ACE_ROOT)\lib\ACEd.lib;$(YARP_DIR)\lib\Debug\YARP_initd.lib;$(YARP_DIR)\lib\Debug\YARP_serversqld.lib;$(YARP_DIR)\lib\Debug\YARP_devd.lib;$(YARP_DIR)\lib\Debug\YARP_sigd.lib;$(YARP_DIR)\lib\Debug\YARP_named.lib;$(YARP_DIR)\lib\Debug\YARP_OSd.lib;$(YARP_DIR)\lib\Debug\YARP_sqlited.lib;MaxAPI.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ACE_ROOT)\lib\ACE.lib;$(YARP_DIR)\lib\Release\YARP_init.lib;$(YARP_DIR)\lib\Release\YARP_serversql.lib;$(YARP_DIR)\lib\Release\YARP_dev.lib;$(YARP_DIR)\lib\Release\YARP_sig.lib;$(YARP_DIR)\lib\Release\YARP_name.lib;$(YARP_DIR)\lib\Release\YARP_OS.lib;MaxAPI.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mxe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>.\..\..\..\c74support\max-includes;.\..\..\..\c74support\msp-includes;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -146,7 +146,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>/MACHINE:I386 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>$(ACE_ROOT)\lib\ACE.lib;$(YARP_DIR)\lib\Release\YARP_init.lib;$(YARP_DIR)\lib\Release\YARP_serversql.lib;$(YARP_DIR)\lib\Release\YARP_dev.lib;$(YARP_DIR)\lib\Release\YARP_sig.lib;$(YARP_DIR)\lib\Release\YARP_name.lib;$(YARP_DIR)\lib\Release\YARP_OS.lib;$(YARP_DIR)\lib\Release\YARP_sqlite.lib;MaxAPI.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>MaxAPI.lib;winmm.lib;$(ACE_ROOT)\lib\ACE.lib;$(YARP_DIR)\lib\Release\YARP_init.lib;$(YARP_DIR)\lib\Release\YARP_serversql.lib;$(YARP_DIR)\lib\Release\YARP_dev.lib;$(YARP_DIR)\lib\Release\YARP_sig.lib;$(YARP_DIR)\lib\Release\YARP_name.lib;$(YARP_DIR)\lib\Release\YARP_OS.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)$(ProjectName).mxe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>.\..\..\..\c74support\max-includes;.\..\..\..\c74support\msp-includes;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

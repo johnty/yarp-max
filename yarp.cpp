@@ -198,7 +198,7 @@ void *yarp_new(t_symbol *s, long argc, t_atom *argv)
 	poststring("new yarp!\n");
 	char str[32];
 	sprintf(str, "num args=%ld", argc);
-	poststring(str);
+	//poststring(str);
 	
 	t_yarp	*x;
 
@@ -393,7 +393,7 @@ void yarp_list(t_yarp *x, t_symbol *msg, long argc, t_atom *argv)
 	x->out = &(x->port->prepare());
 	x->out->clear();
 
-	post("num= %ld",argc);
+	//post("num= %ld",argc);
 	int i;
 	t_atom* ap;
 	for (i = 0, ap = argv; i < argc; i++, ap++) {
